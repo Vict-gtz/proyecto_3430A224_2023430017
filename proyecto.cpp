@@ -7,7 +7,7 @@
 
 using namespace std;
 
-
+// Funcion para leer la matriz de puntuacion
 vector<vector<int>> leerCSV(const string &matriz_archivo) {
     vector<vector<int>> matriz;
     ifstream file(matriz_archivo);
@@ -55,10 +55,24 @@ vector<vector<int>> leerCSV(const string &matriz_archivo) {
 void imprimirMatriz(const vector<vector<int>> &matriz) {
     for (const auto &fila : matriz) {
         for (int valor : fila) {
-            cout << valor << "  ";
+            cout << valor << " ";
         }
         cout << endl;
     }
+}
+
+// Función para inicializar la matriz con las penalizaciones
+vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_penalidad, int filas, int columnas) {
+    // Primera fila
+    for (int j = 0; j < columnas; ++j) {
+        matriz[0][j] = j * puntaje_penalidad;
+    }
+
+    // Primera columna
+    for (int i = 0; i < filas; ++i) {
+        matriz[i][0] = i * puntaje_penalidad;
+    }
+    return matriz;
 }
 
 
@@ -71,13 +85,13 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     vector<char> secuencia_HORIZONTAL;
     vector<char> secuencia_VERTICAL; 
-    
+
     vector<vector<int>> matriz_puntuacion = leerCSV(argv[3]);
     vector<vector<int>> secuencias_comparadas;
 
 
     // Revisar caracteres validos
-    auto is_valid_nucleotide = [](char c) {
+    auto nucleotido_valido = [](char c) {
         return c == 'A' || c == 'T' || c == 'C' || c == 'G';
     };
 
@@ -93,7 +107,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     while (getline(archivo_sec1, linea)) {
         if (linea[0] == '>') continue; 
         for (char lineac : linea) {
-            if (is_valid_nucleotide(lineac)) {
+            if (nucleotido_valido(lineac)) {
                 secuencia_HORIZONTAL.push_back(lineac);
             }
         }
@@ -111,14 +125,23 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     while (getline(archivo_sec2, linea)){
         if (linea[0] == '>') continue; 
         for (char lineac : linea) {
-            if (is_valid_nucleotide(lineac)) {
+            if (nucleotido_valido(lineac)) {
                 secuencia_VERTICAL.push_back(lineac);
             }
         }
     }
     archivo_sec2.close();
 
-    /*// Mostrar los contenidos leídos de ambos archivos
+    // Se crea matriz segun longitud de secuencias
+    int filas = secuencia_HORIZONTAL.size() +1;
+    int columnas = secuencia_VERTICAL.size() +1;
+
+    vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
+
+    matriz_inicial(matriz, puntaje_penalidad, filas, columnas);
+
+
+    /*// Mostrar los contenidos leidos de ambos archivos
     cout << "Contenido del archivo 1:" << endl;
     for (char c : secuencia_HORIZONTAL) {
         cout << c;
@@ -130,7 +153,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     }*/
 
     // Imprimir la matriz
-    cout << "Matriz de puntuación:\nA   T   C   G   -" << endl;
+    cout << "Matriz de puntuación:\nA  T  C  G" << endl;
     imprimirMatriz(matriz_puntuacion);
 
     return 0;
