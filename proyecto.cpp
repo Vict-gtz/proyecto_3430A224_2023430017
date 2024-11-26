@@ -12,29 +12,28 @@ vector<vector<int>> leerCSV(const string &matriz_archivo) {
     vector<vector<int>> matriz;
     ifstream file(matriz_archivo);
 
-    // Caso de error
-    if (!file) {
+    if (!file) { // Caso de error
         cerr << "Error: No se pudo abrir el archivo " << matriz_archivo << endl; 
         exit(1);
     }
 
     string line;
-    bool esPrimeraFila = true; // Ignorar la primera fila
+    bool primeraFila = true; // Ignorar la primera fila
 
     while (getline(file, line)) {
         stringstream ss(line);
         string value;
         vector<int> fila;
 
-        if (esPrimeraFila) { // Ignorar encabezados de la primera fila
-            esPrimeraFila = false;
+        if (primeraFila) { // Ignorar encabezados de la primera fila
+            primeraFila = false;
             continue;
         }
 
-        bool esPrimeraColumna = true;
+        bool primeraColumna = true;
         while (getline(ss, value, ',')) {
-            if (esPrimeraColumna) { // Ignorar encabezados de la primera columna
-                esPrimeraColumna = false;
+            if (primeraColumna) { // Ignorar encabezados de la primera columna
+                primeraColumna = false;
                 continue;
             }
 
@@ -56,7 +55,7 @@ vector<vector<int>> leerCSV(const string &matriz_archivo) {
 void imprimirMatriz(const vector<vector<int>> &matriz) {
     for (const auto &fila : matriz) {
         for (int valor : fila) {
-            cout << valor << " ";
+            cout << valor << "  ";
         }
         cout << endl;
     }
@@ -67,18 +66,21 @@ void imprimirMatriz(const vector<vector<int>> &matriz) {
 int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matriz.csv penitencia_puntos_valor
     //Variables
     const int puntaje_penalidad = stoi(argv[4]);
-
     string linea;
+    string arreglo_ADN[4] = {"A", "C", "G", "T"};
 
     vector<char> secuencia_HORIZONTAL;
     vector<char> secuencia_VERTICAL; 
-    string arreglo_ADN[4] = {"A", "C", "G", "T"};
-    vector<vector<int>> matriz_puntuacion = leerCSV(argv[3]); //ATCG -> orden
+    
+    vector<vector<int>> matriz_puntuacion = leerCSV(argv[3]);
+    vector<vector<int>> secuencias_comparadas;
+
 
     // Revisar caracteres validos
     auto is_valid_nucleotide = [](char c) {
         return c == 'A' || c == 'T' || c == 'C' || c == 'G';
     };
+
 
     // Abrir el primer archivo (HORIZONTAL)
     ifstream archivo_sec1(argv[1]);
@@ -116,7 +118,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     }
     archivo_sec2.close();
 
-    // Mostrar los contenidos leídos de ambos archivos
+    /*// Mostrar los contenidos leídos de ambos archivos
     cout << "Contenido del archivo 1:" << endl;
     for (char c : secuencia_HORIZONTAL) {
         cout << c;
@@ -125,10 +127,10 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     cout << "\nContenido del archivo 2:" << endl;
     for (char c : secuencia_VERTICAL) {
         cout << c;
-    }
+    }*/
 
     // Imprimir la matriz
-    cout << "Matriz leída desde el archivo CSV:" << endl;
+    cout << "Matriz de puntuación:\nA   T   C   G   -" << endl;
     imprimirMatriz(matriz_puntuacion);
 
     return 0;
