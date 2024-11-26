@@ -75,6 +75,13 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
     return matriz;
 }
 
+// Funcion para rellenar la matriz utilizando Needleman-Wunsch
+vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
+
+    
+    return matriz; // Retornar la matriz modificada
+}
+
 
 
 int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matriz.csv penitencia_puntos_valor
@@ -140,20 +147,19 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
 
-    matriz_inicial(matriz,
+    matriz_inicial(
+        matriz,
         puntaje_penalidad,
-        filas,
-        columnas
+        filas, columnas
     );
 
     // Aquí se va al proceso de needleman_wunsch
     needleman_wunsch(
-        matriz,
-        matriz_puntuacion,
-        secuencia_HORIZONTAL,
-        secuencia_VERTICAL,
+        matriz, matriz_puntuacion,
+        secuencia_HORIZONTAL, secuencia_VERTICAL,
         puntaje_penalidad,
-        arreglo_ADN
+        arreglo_ADN,
+        filas, columnas
     );
 
 
