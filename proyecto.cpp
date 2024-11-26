@@ -91,10 +91,14 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
 
     // Revisar caracteres validos
-    auto nucleotido_valido = [](char c) {
-        return c == 'A' || c == 'T' || c == 'C' || c == 'G';
+    auto nucleotido_valido = [&arreglo_ADN](char c) {
+        for (const string &nucleotido : arreglo_ADN) {
+            if (nucleotido[0] == c) {
+                return true;
+            }
+        }
+        return false;
     };
-
 
     // Abrir el primer archivo (HORIZONTAL)
     ifstream archivo_sec1(argv[1]);
@@ -105,7 +109,6 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     // Leer datos del primer archivo
     while (getline(archivo_sec1, linea)) {
-        if (linea[0] == '>') continue; 
         for (char lineac : linea) {
             if (nucleotido_valido(lineac)) {
                 secuencia_HORIZONTAL.push_back(lineac);
@@ -123,7 +126,6 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     // Leer datos del segundo archivo
     while (getline(archivo_sec2, linea)){
-        if (linea[0] == '>') continue; 
         for (char lineac : linea) {
             if (nucleotido_valido(lineac)) {
                 secuencia_VERTICAL.push_back(lineac);
@@ -138,14 +140,28 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
 
-    matriz_inicial(matriz, puntaje_penalidad, filas, columnas);
+    matriz_inicial(matriz,
+        puntaje_penalidad,
+        filas,
+        columnas
+    );
+
+    // Aquí se va al proceso de needleman_wunsch
+    needleman_wunsch(
+        matriz,
+        matriz_puntuacion,
+        secuencia_HORIZONTAL,
+        secuencia_VERTICAL,
+        puntaje_penalidad,
+        arreglo_ADN
+    );
 
 
     /*// Mostrar los contenidos leidos de ambos archivos
     cout << "Contenido del archivo 1:" << endl;
     for (char c : secuencia_HORIZONTAL) {
         cout << c;
-    }
+    }/*
 
     cout << "\nContenido del archivo 2:" << endl;
     for (char c : secuencia_VERTICAL) {
