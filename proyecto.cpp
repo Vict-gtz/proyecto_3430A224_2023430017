@@ -4,6 +4,7 @@
 #include <string>
 #include <cctype>
 #include <sstream>
+#include <climits>
 
 using namespace std;
 
@@ -60,6 +61,31 @@ void imprimirMatriz(const vector<vector<int>> &matriz) {
         cout << endl;
     }
 }
+
+// Funcion para rellenar la matriz de direcciones
+vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz) {
+    int filas = matriz.size();
+    int columnas = matriz[0].size();
+
+    // Matriz de direcciones para registrar el camino de vuelta
+    vector<vector<int>> matriz_direccion(filas, vector<int>(columnas, 2));
+
+    // DIAGONAL = 0
+    // ARRIBA = 1
+    // IZQUIERDA = 2
+
+    // Orden de prioridad: DIAGONAL > ARRIBA > IZQUIERDA
+
+    for (int i = filas - 1; i >= 0; i--) { 
+        for (int j = columnas - 1; j >= 0; j--) {
+            cout << matriz[i][j] << "::";
+        }
+    }
+
+    // Regresa la matriz de direcciones
+    return matriz_direccion;
+}
+
 
 // Función para inicializar la matriz con las penalizaciones
 vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_penalidad, int filas, int columnas) {
@@ -209,6 +235,14 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     cout << "\n\nMatriz de Needleman Wusnch:" << endl;
     imprimirMatriz(matriz);
+
+   // Rastrear el camino de vuelta
+    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
+
+    // Imprimir la matriz de direcciones
+    cout << "\nMatriz de Direcciones (camino de vuelta):" << endl;
+    imprimirMatriz(matriz_direcciones);
+
 
     return 0;
 }
