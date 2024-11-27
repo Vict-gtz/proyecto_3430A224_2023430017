@@ -77,7 +77,34 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
 
 // Funcion para rellenar la matriz utilizando Needleman-Wunsch
 vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
+    // Aqui mapea los nucleotidos para comparar
+    auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
+        for (int i = 0; i < 4; ++i) {
+            if (arreglo_ADN[i][0] == nucleotido) {
+                return i;
+            }
+        }
+        return -1;
+    };
 
+    // Iterar para rellenar matriz
+    for (int i = 1; i < filas; ++i) { 
+        for (int j = 1; j < columnas; ++j) {
+
+            int indice_HORIZONTAL = indice_nucleotido(secuencia_HORIZONTAL[j - 1]);
+            int indice_VERTICAL = indice_nucleotido(secuencia_VERTICAL[i - 1]);
+
+            // Revisar los 3 casos
+            int caso_match = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL]; // CASO: diagonal
+
+            int caso_arriba = matriz[i - 1][j] + puntaje_penalidad; // CASO: arriba
+
+            int caso_izquierda = matriz[i][j - 1] + puntaje_penalidad; // CASO: izquierda
+
+            // Seleccionar el máximo de los tres valores calculados
+            matriz[i][j] = max(caso_match, max(caso_arriba, caso_izquierda));
+        }
+    }
     
     return matriz; // Retornar la matriz modificada
 }
@@ -116,6 +143,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     // Leer datos del primer archivo
     while (getline(archivo_sec1, linea)) {
+        if (linea[0] == '>') continue; // skip header
         for (char lineac : linea) {
             if (nucleotido_valido(lineac)) {
                 secuencia_HORIZONTAL.push_back(lineac);
@@ -133,6 +161,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     // Leer datos del segundo archivo
     while (getline(archivo_sec2, linea)){
+        if (linea[0] == '>') continue; 
         for (char lineac : linea) {
             if (nucleotido_valido(lineac)) {
                 secuencia_VERTICAL.push_back(lineac);
@@ -177,6 +206,8 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     // Imprimir la matriz
     cout << "Matriz de puntuación:\nA  T  C  G" << endl;
     imprimirMatriz(matriz_puntuacion);
+
+    imprimirMatriz(matriz);
 
     return 0;
 }
