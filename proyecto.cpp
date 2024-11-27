@@ -5,6 +5,7 @@
 #include <cctype>
 #include <sstream>
 #include <climits>
+#include <utility>
 
 using namespace std;
 
@@ -170,8 +171,8 @@ vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<v
     return matriz; // Retornar la matriz modificada
 }
 
-
-vector<char> cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &secuencia_HORIZONTAL, vector<char> &secuencia_VERTICAL){
+// Funcion para cambiar las secuencias
+pair<vector<char>, vector<char>>  cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &secuencia_HORIZONTAL, vector<char> &secuencia_VERTICAL){
     for (int i = 1; i < arreglo_direcciones.size(); ++i) { 
         if (arreglo_direcciones[i] == 1){ // CASO: arriba
             secuencia_HORIZONTAL[i] = '-';
@@ -181,8 +182,7 @@ vector<char> cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &se
         
     }
 
-    return secuencia_HORIZONTAL;
-    //return make_pair(secuencia_HORIZONTAL, secuencia_VERTICAL);
+    return make_pair(secuencia_HORIZONTAL, secuencia_VERTICAL);
 }
 
 
@@ -296,18 +296,22 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         cout << arreglo_direcciones[i] << " ";
     }
 
-    cambio_secuencias(arreglo_direcciones, secuencia_HORIZONTAL, secuencia_VERTICAL);
+    // Cambio de secuencias
+    auto secuencias_cambiadas = cambio_secuencias(arreglo_direcciones, secuencia_HORIZONTAL, secuencia_VERTICAL);
+
+    vector<char> nueva_HORIZONTAL = secuencias_cambiadas.first;
+    vector<char> nueva_VERTICAL = secuencias_cambiadas.second;
 
 
     // Mostrar los contenidos leidos de ambos archivos
     cout << "\nSecuencia horizontal:";
     for (char c : secuencia_HORIZONTAL) {
         cout << c;
-    }/*
+    }
 
-    cout << "\nContenido del archivo 2:" << endl;
+    cout << "\nSecuencia vertical:";
     for (char c : secuencia_VERTICAL) {
         cout << c;
-    }*/
+    }
     return 0;
 }
