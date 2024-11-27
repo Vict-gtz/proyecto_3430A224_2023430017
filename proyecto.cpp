@@ -76,9 +76,21 @@ vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz) {
 
     // Orden de prioridad: DIAGONAL > ARRIBA > IZQUIERDA
 
-    for (int i = filas - 1; i >= 0; i--) { 
-        for (int j = columnas - 1; j >= 0; j--) {
-            cout << matriz[i][j] << "::";
+    for (int i = filas - 1; i > 0; i--) { 
+        for (int j = columnas - 1; j > 0; j--) {
+            // Toma valores de los numeros que rodean al valor actual
+            int diagonal = matriz[i-1][j-1];
+            int arriba = matriz[i-1][j];
+            int izquierda = matriz[i][j-1];
+
+            // Comparaciones
+            if (diagonal >= arriba && diagonal >= izquierda) {// Si la diagonal es mayor o igual a los demás, selecciona diagonal
+                matriz_direccion[i][j] = 0;
+            } else if (arriba >= izquierda && arriba > diagonal) {// Si arriba es mayor o igual a izquierda, selecciona arriba
+                matriz_direccion[i][j] = 1;
+            } else {// Si izquierda es mayor, selecciona izquierda
+                matriz_direccion[i][j] = 2;
+            }
         }
     }
 
@@ -217,6 +229,9 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         filas, columnas
     );
 
+   // Rastrear el camino de vuelta
+    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
+
 
     /*// Mostrar los contenidos leidos de ambos archivos
     cout << "Contenido del archivo 1:" << endl;
@@ -236,10 +251,6 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     cout << "\n\nMatriz de Needleman Wusnch:" << endl;
     imprimirMatriz(matriz);
 
-   // Rastrear el camino de vuelta
-    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
-
-    // Imprimir la matriz de direcciones
     cout << "\nMatriz de Direcciones (camino de vuelta):" << endl;
     imprimirMatriz(matriz_direcciones);
 
