@@ -4,7 +4,6 @@
 #include <string>
 #include <cctype>
 #include <sstream>
-#include <tuple>
 
 using namespace std;
 
@@ -76,31 +75,8 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
     return matriz;
 }
 
-// Funcion para rellenar la matriz de direcciones
-vector<vector<int>> matriz_direccionesF(vector<vector<int>> &matriz_direccion, int puntuacion, int fila, int columna, int caso_match, int caso_izquierda, int caso_arriba){
-    // DIAGONAL = 0
-    // ARRIBA = 1
-    // IZQUIERDA = 2
-
-    if (puntuacion == caso_match) {// Prioriza la diagonal
-        matriz_direccion[fila][columna] = 0; 
-        return matriz_direccion;
-    } else {
-        if (puntuacion == caso_arriba) {
-            matriz_direccion[fila][columna] = 1; 
-            return matriz_direccion;
-        } else {
-            matriz_direccion[fila][columna] = 2; 
-            return matriz_direccion;
-        }
-    }
-}
-
 // Funcion para rellenar la matriz utilizando Needleman-Wunsch
-tuple<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
-    // Matriz de direcciones vacia
-    vector<vector<int>> matriz_direccion(filas, vector<int>(columnas, 2));
-    
+vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
     // Aqui mapea los nucleotidos para comparar
     auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
         for (int i = 0; i < 4; ++i) {
@@ -121,25 +97,17 @@ tuple<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(vector<vector<i
             // Revisar los 3 casos
             int caso_match = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL]; // CASO: diagonal
 
-            int caso_izquierda = matriz[i - 1][j] + puntaje_penalidad; // CASO: izquierda
+            int caso_arriba = matriz[i - 1][j] + puntaje_penalidad; // CASO: arriba
 
-            int caso_arriba = matriz[i][j - 1] + puntaje_penalidad; // CASO: arriba
+            int caso_izquierda = matriz[i][j - 1] + puntaje_penalidad; // CASO: izquierda
 
             // Seleccionar el máximo de los tres valores calculados
-            int puntuacion = max(caso_match, max(caso_arriba, caso_izquierda));
-            matriz[i][j] = puntuacion;
-
-            // Rellena matriz de direcciones
-            matriz_direccionesF(matriz_direccion,
-                puntuacion,
-                i, j,
-                caso_match, caso_izquierda, caso_arriba
-            );
+            matriz[i][j] = max(caso_match, max(caso_arriba, caso_izquierda));
         }
     }
-    return make_tuple(matriz, matriz_direccion); // Retornar las matrices modificadas en una tupla
+    
+    return matriz; // Retornar la matriz modificada
 }
-
 
 
 
@@ -215,17 +183,13 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     );
 
     // Aquí se va al proceso de needleman_wunsch
-    auto matrices_funcion = needleman_wunsch(
+    needleman_wunsch(
         matriz, matriz_puntuacion,
         secuencia_HORIZONTAL, secuencia_VERTICAL,
         puntaje_penalidad,
         arreglo_ADN,
         filas, columnas
     );
-
-    vector<vector<int>> matriz_resultado = get<0>(matrices_funcion);
-    vector<vector<int>> matriz_direcciones = get<1>(matrices_funcion);
-
 
 
     /*// Mostrar los contenidos leidos de ambos archivos
@@ -239,12 +203,12 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         cout << c;
     }*/
 
-    // Imprimir la matriz de Needleman
-    cout << "Matriz de Needleman wunsch:" << endl;
-    imprimirMatriz(matriz_resultado);
+    // Imprimir matrices
+    cout << "Matriz de puntuación:\nA  T  C  G" << endl;
+    imprimirMatriz(matriz_puntuacion);
 
-    cout << "\n\nMatriz de direcciones:" << endl;
-    imprimirMatriz(matriz_direcciones);
+    cout << "\n\nMatriz de Needleman Wusnch:" << endl;
+    imprimirMatriz(matriz);
 
     return 0;
 }
