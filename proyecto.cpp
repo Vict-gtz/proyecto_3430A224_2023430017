@@ -75,8 +75,31 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
     return matriz;
 }
 
+// Funcion para rellenar la matriz de direcciones
+vector<vector<int>> matriz_direcciones(vector<vector<int>> &matriz_direccion, int puntuacion, int fila, int columna, int caso_match, int caso_izquierda, int caso_arriba){
+    // DIAGONAL = 0
+    // IZQUIERDA = 1
+    // ARRIBA = 2
+    
+    if (puntuacion == caso_match) {// Prioriza la diagonal
+        matriz_direccion[fila][columna] = 0; 
+        return matriz_direccion;
+    } else {
+        if (puntuacion == caso_arriba) {
+            matriz_direccion[fila][columna] = 2; 
+            return matriz_direccion;
+        } else {
+            matriz_direccion[fila][columna] = 1; 
+            return matriz_direccion;
+        }
+    }
+}
+
 // Funcion para rellenar la matriz utilizando Needleman-Wunsch
 vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
+    // Matriz de direcciones vacia
+    vector<vector<int>> matriz_direccion(filas, vector<int>(columnas, 0));
+    
     // Aqui mapea los nucleotidos para comparar
     auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
         for (int i = 0; i < 4; ++i) {
@@ -97,17 +120,25 @@ vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<v
             // Revisar los 3 casos
             int caso_match = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL]; // CASO: diagonal
 
-            int caso_arriba = matriz[i - 1][j] + puntaje_penalidad; // CASO: arriba
+            int caso_izquierda = matriz[i - 1][j] + puntaje_penalidad; // CASO: izquierda
 
-            int caso_izquierda = matriz[i][j - 1] + puntaje_penalidad; // CASO: izquierda
+            int caso_arriba = matriz[i][j - 1] + puntaje_penalidad; // CASO: arriba
 
             // Seleccionar el máximo de los tres valores calculados
-            matriz[i][j] = max(caso_match, max(caso_arriba, caso_izquierda));
+            int puntuacion = max(caso_match, max(caso_arriba, caso_izquierda));
+            matriz[i][j] = puntuacion;
+
+            // Rellena matriz de direcciones
+            matriz_direcciones(matriz_direccion,
+                puntuacion,
+                i, j,
+                caso_match, caso_izquierda, caso_arriba
+            );
         }
     }
-    
     return matriz; // Retornar la matriz modificada
 }
+
 
 
 
@@ -203,10 +234,8 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         cout << c;
     }*/
 
-    // Imprimir la matriz
-    cout << "Matriz de puntuación:\nA  T  C  G" << endl;
-    imprimirMatriz(matriz_puntuacion);
-
+    // Imprimir la matriz de Needleman
+    cout << "Matriz de Needleman wunsch:" << endl;
     imprimirMatriz(matriz);
 
     return 0;
