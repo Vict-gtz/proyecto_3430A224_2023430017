@@ -171,6 +171,20 @@ vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<v
 }
 
 
+vector<char> cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &secuencia_HORIZONTAL, vector<char> &secuencia_VERTICAL){
+    for (int i = 1; i < arreglo_direcciones.size(); ++i) { 
+        if (arreglo_direcciones[i] == 1){ // CASO: arriba
+            secuencia_HORIZONTAL[i] = '-';
+        } else if (arreglo_direcciones[i] == 2) { // CASO: izquierda
+            secuencia_VERTICAL[i] = '-';
+        }
+        
+    }
+
+    return secuencia_HORIZONTAL;
+    //return make_pair(secuencia_HORIZONTAL, secuencia_VERTICAL);
+}
+
 
 int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matriz.csv penitencia_puntos_valor
     //Variables
@@ -262,19 +276,8 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
 
     // Obtener el camino de regreso a partir de la matriz de direcciones en un arreglo
-    vector<int> camino = arreglo_CaminoRegreso(matriz_direcciones);
+    vector<int> arreglo_direcciones = arreglo_CaminoRegreso(matriz_direcciones);
 
-
-    /*// Mostrar los contenidos leidos de ambos archivos
-    cout << "Contenido del archivo 1:" << endl;
-    for (char c : secuencia_HORIZONTAL) {
-        cout << c;
-    }/*
-
-    cout << "\nContenido del archivo 2:" << endl;
-    for (char c : secuencia_VERTICAL) {
-        cout << c;
-    }*/
 
     // Imprimir matrices
     cout << "Matriz de puntuación:\nA  T  C  G" << endl;
@@ -288,12 +291,23 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     
     // Imprimir el camino
-    cout << "\nCamino de regreso:" << endl;
-    for (int i = 0; i < camino.size(); ++i) { 
-        cout << camino[i] << " ";
+    cout << "\nCamino de regreso:";
+    for (int i = 0; i < arreglo_direcciones.size(); ++i) { 
+        cout << arreglo_direcciones[i] << " ";
     }
 
+    cambio_secuencias(arreglo_direcciones, secuencia_HORIZONTAL, secuencia_VERTICAL);
 
 
+    // Mostrar los contenidos leidos de ambos archivos
+    cout << "\nSecuencia horizontal:";
+    for (char c : secuencia_HORIZONTAL) {
+        cout << c;
+    }/*
+
+    cout << "\nContenido del archivo 2:" << endl;
+    for (char c : secuencia_VERTICAL) {
+        cout << c;
+    }*/
     return 0;
 }
