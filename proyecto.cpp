@@ -52,6 +52,29 @@ vector<vector<int>> leerCSV(const string &matriz_archivo) {
     return matriz;
 }
 
+// Funcion para crear un arreglo de camino de regreso segun matriz de direcciones
+vector<int> arreglo_CaminoRegreso(const vector<vector<int>> &matriz_direccion) {
+    // Se crea un arreglo para guardar el camino de regreso
+    vector<int> camino;
+    int fila = matriz_direccion.size() - 1;
+    int columna = matriz_direccion[0].size() - 1;
+
+    while (fila > 0 && columna > 0) {
+        camino.insert(camino.begin(), matriz_direccion[fila][columna]);
+
+        if (matriz_direccion[fila][columna] == 0) { // Se mueve en la diagonal
+            --fila; 
+            --columna; 
+        } else if (matriz_direccion[fila][columna] == 1) { // Se mueve hacia arriba
+            --fila; 
+        } else { // Se mueve hacia la izquierda
+            --columna; 
+        }
+    }
+
+    return camino;
+}
+
 // Función para imprimir la matriz
 void imprimirMatriz(const vector<vector<int>> &matriz) {
     for (const auto &fila : matriz) {
@@ -162,7 +185,8 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     vector<vector<int>> secuencias_comparadas;
 
 
-    // Revisar caracteres validos
+
+    // Revisar caracteres validos (para leer secuencias)
     auto nucleotido_valido = [&arreglo_ADN](char c) {
         for (const string &nucleotido : arreglo_ADN) {
             if (nucleotido[0] == c) {
@@ -171,6 +195,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         }
         return false;
     };
+
 
     // Abrir el primer archivo (HORIZONTAL)
     ifstream archivo_sec1(argv[1]);
@@ -190,6 +215,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     }
     archivo_sec1.close();
 
+
     // Abrir el segundo archivo (VERTICAL)
     ifstream archivo_sec2(argv[2]);
     if (!archivo_sec2) {
@@ -208,19 +234,22 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     }
     archivo_sec2.close();
 
+
+
     // Se crea matriz segun longitud de secuencias
     int filas = secuencia_HORIZONTAL.size() +1;
     int columnas = secuencia_VERTICAL.size() +1;
 
     vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
 
+    // Aqui la matriz se llena con los valores del gap
     matriz_inicial(
         matriz,
         puntaje_penalidad,
         filas, columnas
     );
 
-    // Aquí se va al proceso de needleman_wunsch
+    // Aqui se va al proceso de needleman_wunsch
     needleman_wunsch(
         matriz, matriz_puntuacion,
         secuencia_HORIZONTAL, secuencia_VERTICAL,
@@ -229,8 +258,11 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         filas, columnas
     );
 
-   // Rastrear el camino de vuelta
+   // Matriz para rastrear el camino de regreso
     vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
+
+    // Obtener el camino de regreso a partir de la matriz de direcciones en un arreglo
+    vector<int> camino = arreglo_CaminoRegreso(matriz_direcciones);
 
 
     /*// Mostrar los contenidos leidos de ambos archivos
@@ -253,6 +285,14 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
 
     cout << "\nMatriz de Direcciones (camino de vuelta):" << endl;
     imprimirMatriz(matriz_direcciones);
+
+    
+    // Imprimir el camino
+    cout << "\nCamino de regreso:" << endl;
+    for (int i = 0; i < camino.size(); ++i) { 
+        cout << camino[i] << " ";
+    }
+
 
 
     return 0;
