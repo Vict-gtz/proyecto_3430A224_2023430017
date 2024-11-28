@@ -1,4 +1,4 @@
 > Secuencia 1:
-TTCTTG
+TTCTTG-
 > Secuencia 2:
-ATCCGT
+ATC-CGT
