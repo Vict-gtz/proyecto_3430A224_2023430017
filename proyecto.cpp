@@ -86,55 +86,6 @@ void imprimirMatriz(const vector<vector<int>> &matriz) {
     }
 }
 
-// Funcion para rellenar la matriz de direcciones
-vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[]) {
-    int filas = matriz.size();
-    int columnas = matriz[0].size();
-
-    // Matriz de direcciones para registrar el camino de vuelta
-    vector<vector<int>> matriz_direccion(filas, vector<int>(columnas, 2));
-
-     // Función para mapear nucleótido a índice
-    auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
-        for (int i = 0; i < 4; ++i) {
-            if (arreglo_ADN[i][0] == nucleotido) {
-                return i;
-            }
-        }
-        return -1; // Valor inválido
-    };
-
-    // DIAGONAL = 0
-    // ARRIBA = 1
-    // IZQUIERDA = 2
-
-    // Orden de prioridad: DIAGONAL > ARRIBA > IZQUIERDA
-
-    for (int i = filas - 1; i > 0; i--) { 
-        for (int j = columnas - 1; j > 0; j--) {
-            // Índices en la matriz de puntuación
-            int indice_VERTICAL = indice_nucleotido(secuencia_VERTICAL[i - 1]);
-            int indice_HORIZONTAL = indice_nucleotido(secuencia_HORIZONTAL[j - 1]);
-
-            // Toma valores de los numeros que rodean al valor actual + valor de abrir gap
-            int diagonal = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL];
-            int arriba = matriz[i-1][j] + puntaje_penalidad;
-            int izquierda = matriz[i][j-1] + puntaje_penalidad;
-
-            // Comparaciones
-            if (diagonal >= arriba && diagonal >= izquierda) {// Si la diagonal es mayor o igual a los demás, selecciona diagonal
-                matriz_direccion[i][j] = 0;
-            } else if (arriba >= izquierda && arriba > diagonal) {// Si arriba es mayor o igual a izquierda, selecciona arriba
-                matriz_direccion[i][j] = 1;
-            } else {// Si izquierda es mayor, selecciona izquierda
-                matriz_direccion[i][j] = 2;
-            }
-        }
-    }
-
-    // Regresa la matriz de direcciones
-    return matriz_direccion;
-}
 
 
 // Función para inicializar la matriz con las penalizaciones
@@ -151,46 +102,70 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
     return matriz;
 }
 
-// Funcion para rellenar la matriz utilizando Needleman-Wunsch
-vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
-    // Aqui mapea los nucleotidos para comparar
+// Función modificada para realizar Needleman-Wunsch y rellenar la matriz de direcciones
+pair<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
+    // Matriz de puntuación
+    vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
+
+    // Matriz de direcciones (0: diagonal, 1: arriba, 2: izquierda)
+    vector<vector<int>> matriz_direcciones(filas, vector<int>(columnas, 2));
+
+    // Función para mapear nucleótido a índice
     auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
         for (int i = 0; i < 4; ++i) {
             if (arreglo_ADN[i][0] == nucleotido) {
                 return i;
             }
         }
-        return -1;
+        return -1; // Valor inválido
     };
 
-    // Iterar para rellenar matriz
-    for (int i = 1; i < filas; ++i) { 
-        for (int j = 1; j < columnas; ++j) {
+    // Inicializar la primera fila y columna con las penalizaciones
+    for (int i = 0; i < filas; ++i) {
+        matriz[i][0] = i * puntaje_penalidad;
+        matriz_direcciones[i][0] = 1; // Arriba
+    }
+    for (int j = 0; j < columnas; ++j) {
+        matriz[0][j] = j * puntaje_penalidad;
+        matriz_direcciones[0][j] = 2; // Izquierda
+    }
 
+    // Llenar las matrices de puntuaciones y direcciones
+    for (int i = 1; i < filas; ++i) {
+        for (int j = 1; j < columnas; ++j) {
+            // Índices en la matriz de puntuación
             int indice_HORIZONTAL = indice_nucleotido(secuencia_HORIZONTAL[j - 1]);
             int indice_VERTICAL = indice_nucleotido(secuencia_VERTICAL[i - 1]);
 
             // Revisar los 3 casos
-            int caso_match = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL]; // CASO: diagonal
+            int caso_match = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL];
+            int caso_arriba = matriz[i - 1][j] + puntaje_penalidad;
+            int caso_izquierda = matriz[i][j - 1] + puntaje_penalidad;
 
-            int caso_arriba = matriz[i - 1][j] + puntaje_penalidad; // CASO: arriba
-
-            int caso_izquierda = matriz[i][j - 1] + puntaje_penalidad; // CASO: izquierda
-
-            // Seleccionar el máximo de los tres valores calculados
-            matriz[i][j] = max(caso_match, max(caso_arriba, caso_izquierda));
+            // Determinar el valor máximo y su dirección
+            if (caso_match >= caso_arriba && caso_match >= caso_izquierda) {
+                matriz[i][j] = caso_match;
+                matriz_direcciones[i][j] = 0; // Diagonal
+            } else if (caso_arriba >= caso_izquierda) {
+                matriz[i][j] = caso_arriba;
+                matriz_direcciones[i][j] = 1; // Arriba
+            } else {
+                matriz[i][j] = caso_izquierda;
+                matriz_direcciones[i][j] = 2; // Izquierda
+            }
         }
     }
-    
-    return matriz; // Retornar la matriz modificada
+
+    return make_pair(matriz, matriz_direcciones);
 }
+
 
 // Funcion para cambiar las secuencias
 pair<vector<char>, vector<char>>  cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &secuencia_HORIZONTAL, vector<char> &secuencia_VERTICAL){
     int offset_horizontal = 0; // Desplazamiento acumulado para secuencia_HORIZONTAL
     int offset_vertical = 0;   // Desplazamiento acumulado para secuencia_VERTICAL
     
-    for (int i = arreglo_direcciones.size(); i > 0; --i) { 
+    for (int i = arreglo_direcciones.size()-1; i > 0; --i) { 
         if (arreglo_direcciones[i] == 1){ // CASO: arriba
             secuencia_HORIZONTAL.insert(secuencia_HORIZONTAL.begin() + i + offset_horizontal, '-');
             offset_horizontal++;
@@ -286,21 +261,17 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     );
 
     // Aqui se va al proceso de needleman_wunsch
-    needleman_wunsch(
-        matriz, matriz_puntuacion,
-        secuencia_HORIZONTAL, secuencia_VERTICAL,
+    auto resultado = needleman_wunsch(
+        matriz_puntuacion,
+        secuencia_HORIZONTAL,
+        secuencia_VERTICAL,
         puntaje_penalidad,
         arreglo_ADN,
         filas, columnas
     );
 
-   // Matriz para rastrear el camino de regreso
-    vector<vector<int>> matriz_direcciones = matriz_direccionesF(
-        matriz, matriz_puntuacion, 
-        secuencia_HORIZONTAL, secuencia_VERTICAL, 
-        puntaje_penalidad, 
-        arreglo_ADN
-    );
+    vector<vector<int>> matriz_punt = resultado.first;           // Matriz de puntuación
+    vector<vector<int>> matriz_direcciones = resultado.second; // Matriz de direcciones
 
 
     // Obtener el camino de regreso a partir de la matriz de direcciones en un arreglo
@@ -312,7 +283,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     imprimirMatriz(matriz_puntuacion);
 
     cout << "\n\nMatriz de Needleman Wusnch:" << endl;
-    imprimirMatriz(matriz);
+    imprimirMatriz(matriz_punt);
 
     cout << "\nMatriz de Direcciones (camino de vuelta):" << endl;
     imprimirMatriz(matriz_direcciones);
