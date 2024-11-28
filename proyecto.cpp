@@ -10,37 +10,42 @@
 using namespace std;
 
 // Funcion para leer la matriz de puntuacion
-vector<vector<int>> leerCSV(const string &matriz_archivo) {
+vector<vector<int>> leerCSV(const string &matriz_archivo, vector<string> &encabezados) {
     vector<vector<int>> matriz;
     ifstream file(matriz_archivo);
 
-    if (!file) { // Caso de error
-        cerr << "Error: No se pudo abrir el archivo " << matriz_archivo << endl; 
+    if (!file) {
+        cerr << "Error: No se pudo abrir el archivo " << matriz_archivo << endl;
         exit(1);
     }
 
     string line;
-    bool primeraFila = true; // Ignorar la primera fila
+    bool primeraFila = true;
 
     while (getline(file, line)) {
         stringstream ss(line);
         string value;
         vector<int> fila;
 
-        if (primeraFila) { // Ignorar encabezados de la primera fila
+        if (primeraFila) {
+            // Leer encabezados
+            while (getline(ss, value, ',')) {
+                if (!value.empty() && value != "-") encabezados.push_back(value);
+            }
             primeraFila = false;
             continue;
         }
 
         bool primeraColumna = true;
         while (getline(ss, value, ',')) {
-            if (primeraColumna) { // Ignorar encabezados de la primera columna
+            if (primeraColumna) {
+                // Ignorar el encabezado de la fila
                 primeraColumna = false;
                 continue;
             }
 
             try {
-                fila.push_back(stoi(value)); // Convertir los valores a enteros
+                fila.push_back(stoi(value));
             } catch (const invalid_argument &e) {
                 cerr << "Error: Valor no válido en el archivo CSV: \"" << value << "\"" << endl;
                 exit(1);
@@ -103,7 +108,7 @@ vector<vector<int>> matriz_inicial(vector<vector<int>> &matriz, int puntaje_pena
 }
 
 // Función modificada para realizar Needleman-Wunsch y rellenar la matriz de direcciones
-pair<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas) {
+pair<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[], int filas, int columnas, vector<string> encabezados) {
     // Matriz de puntuación
     vector<vector<int>> matriz(filas, vector<int>(columnas, 0));
 
@@ -111,13 +116,13 @@ pair<vector<vector<int>>, vector<vector<int>>> needleman_wunsch(const vector<vec
     vector<vector<int>> matriz_direcciones(filas, vector<int>(columnas, 2));
 
     // Función para mapear nucleótido a índice
-    auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
-        for (int i = 0; i < 4; ++i) {
-            if (arreglo_ADN[i][0] == nucleotido) {
-                return i;
+    auto indice_nucleotido = [&encabezados](char nucleotido) -> int{
+        for (size_t i = 0; i < encabezados.size(); ++i) {
+            if (encabezados[i] == string(1,nucleotido)) {
+                return static_cast<int>(i);
             }
         }
-        return -1; // Valor inválido
+        exit(1); // Valor inválido
     };
 
     // Inicializar la primera fila y columna con las penalizaciones
@@ -188,11 +193,12 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     const int puntaje_penalidad = stoi(argv[4]);
     string linea;
     string arreglo_ADN[4] = {"A", "C", "G", "T"};
+    vector<string> encabezados;
 
     vector<char> secuencia_HORIZONTAL;
     vector<char> secuencia_VERTICAL; 
 
-    vector<vector<int>> matriz_puntuacion = leerCSV(argv[3]);
+    vector<vector<int>> matriz_puntuacion = leerCSV(argv[3], encabezados);
     vector<vector<int>> secuencias_comparadas;
 
 
@@ -272,7 +278,8 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         secuencia_VERTICAL,
         puntaje_penalidad,
         arreglo_ADN,
-        filas, columnas
+        filas, columnas,
+        encabezados
     );
 
     vector<vector<int>> matriz_punt = resultado.first;           // Matriz de puntuación
