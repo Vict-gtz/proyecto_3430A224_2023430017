@@ -87,12 +87,22 @@ void imprimirMatriz(const vector<vector<int>> &matriz) {
 }
 
 // Funcion para rellenar la matriz de direcciones
-vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz, const int puntaje_penalidad) {
+vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz, const vector<vector<int>> &matriz_puntuacion, const vector<char> &secuencia_HORIZONTAL, const vector<char> &secuencia_VERTICAL, int puntaje_penalidad, const string arreglo_ADN[]) {
     int filas = matriz.size();
     int columnas = matriz[0].size();
 
     // Matriz de direcciones para registrar el camino de vuelta
     vector<vector<int>> matriz_direccion(filas, vector<int>(columnas, 2));
+
+     // Función para mapear nucleótido a índice
+    auto indice_nucleotido = [&arreglo_ADN](char nucleotido) {
+        for (int i = 0; i < 4; ++i) {
+            if (arreglo_ADN[i][0] == nucleotido) {
+                return i;
+            }
+        }
+        return -1; // Valor inválido
+    };
 
     // DIAGONAL = 0
     // ARRIBA = 1
@@ -102,10 +112,14 @@ vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz, const
 
     for (int i = filas - 1; i > 0; i--) { 
         for (int j = columnas - 1; j > 0; j--) {
-            // Toma valores de los numeros que rodean al valor actual
-            int diagonal = matriz[i-1][j-1]; 
-            int arriba = matriz[i-1][j];
-            int izquierda = matriz[i][j-1];
+            // Índices en la matriz de puntuación
+            int indice_VERTICAL = indice_nucleotido(secuencia_VERTICAL[i - 1]);
+            int indice_HORIZONTAL = indice_nucleotido(secuencia_HORIZONTAL[j - 1]);
+
+            // Toma valores de los numeros que rodean al valor actual + valor de abrir gap
+            int diagonal = matriz[i - 1][j - 1] + matriz_puntuacion[indice_VERTICAL][indice_HORIZONTAL];
+            int arriba = matriz[i-1][j] + puntaje_penalidad;
+            int izquierda = matriz[i][j-1] + puntaje_penalidad;
 
             // Comparaciones
             if (diagonal >= arriba && diagonal >= izquierda) {// Si la diagonal es mayor o igual a los demás, selecciona diagonal
@@ -281,7 +295,13 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     );
 
    // Matriz para rastrear el camino de regreso
-    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz, puntaje_penalidad);
+    vector<vector<int>> matriz_direcciones = matriz_direccionesF(
+        matriz, matriz_puntuacion, 
+        secuencia_HORIZONTAL, secuencia_VERTICAL, 
+        puntaje_penalidad, 
+        arreglo_ADN
+    );
+
 
     // Obtener el camino de regreso a partir de la matriz de direcciones en un arreglo
     vector<int> arreglo_direcciones = arreglo_CaminoRegreso(matriz_direcciones);
@@ -321,5 +341,25 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     for (char c : secuencia_VERTICAL) {
         cout << c;
     }
+
+    // Guardar las secuencias arregladas en un archivo
+    ofstream archivo_salida("secuencias_arregladas.txt");
+    if (!archivo_salida) {
+        cerr << "\nError: No se pudo crear el archivo de salida 'secuencias_arregladas.txt'" << endl;
+        return 1;
+    }
+
+    archivo_salida << "> Secuencia 1:\n";
+    for (char c : nueva_HORIZONTAL) {
+        archivo_salida << c;
+    }
+    archivo_salida << "\n> Secuencia 2:\n";
+    for (char c : nueva_VERTICAL) {
+        archivo_salida << c;
+    }
+
+    archivo_salida.close();
+    cout << "\n\nLas secuencias ajustadas se han guardado en 'secuencias_arregladas.txt'.\n";
+
     return 0;
 }
