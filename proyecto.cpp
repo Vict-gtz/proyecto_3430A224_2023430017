@@ -87,7 +87,7 @@ void imprimirMatriz(const vector<vector<int>> &matriz) {
 }
 
 // Funcion para rellenar la matriz de direcciones
-vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz) {
+vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz, const int puntaje_penalidad) {
     int filas = matriz.size();
     int columnas = matriz[0].size();
 
@@ -103,7 +103,7 @@ vector<vector<int>> matriz_direccionesF(const vector<vector<int>> &matriz) {
     for (int i = filas - 1; i > 0; i--) { 
         for (int j = columnas - 1; j > 0; j--) {
             // Toma valores de los numeros que rodean al valor actual
-            int diagonal = matriz[i-1][j-1];
+            int diagonal = matriz[i-1][j-1]; 
             int arriba = matriz[i-1][j];
             int izquierda = matriz[i][j-1];
 
@@ -173,17 +173,25 @@ vector<vector<int>> needleman_wunsch(vector<vector<int>> &matriz, const vector<v
 
 // Funcion para cambiar las secuencias
 pair<vector<char>, vector<char>>  cambio_secuencias(vector<int> arreglo_direcciones, vector<char> &secuencia_HORIZONTAL, vector<char> &secuencia_VERTICAL){
-    for (int i = 1; i < arreglo_direcciones.size(); ++i) { 
+    int offset_horizontal = 0; // Desplazamiento acumulado para secuencia_HORIZONTAL
+    int offset_vertical = 0;   // Desplazamiento acumulado para secuencia_VERTICAL
+    
+    for (int i = arreglo_direcciones.size(); i > 0; --i) { 
         if (arreglo_direcciones[i] == 1){ // CASO: arriba
-            secuencia_HORIZONTAL[i] = '-';
+            secuencia_HORIZONTAL.insert(secuencia_HORIZONTAL.begin() + i + offset_horizontal, '-');
+            offset_horizontal++;
+
         } else if (arreglo_direcciones[i] == 2) { // CASO: izquierda
-            secuencia_VERTICAL[i] = '-';
+            secuencia_VERTICAL.insert(secuencia_VERTICAL.begin() + i + offset_vertical, '-');
+            offset_vertical++;
         }
         
     }
 
     return make_pair(secuencia_HORIZONTAL, secuencia_VERTICAL);
 }
+
+
 
 
 int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matriz.csv penitencia_puntos_valor
@@ -273,7 +281,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     );
 
    // Matriz para rastrear el camino de regreso
-    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz);
+    vector<vector<int>> matriz_direcciones = matriz_direccionesF(matriz, puntaje_penalidad);
 
     // Obtener el camino de regreso a partir de la matriz de direcciones en un arreglo
     vector<int> arreglo_direcciones = arreglo_CaminoRegreso(matriz_direcciones);
@@ -309,7 +317,7 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
         cout << c;
     }
 
-    cout << "\nSecuencia vertical:";
+    cout << "\nSecuencia vertical:  ";
     for (char c : secuencia_VERTICAL) {
         cout << c;
     }
