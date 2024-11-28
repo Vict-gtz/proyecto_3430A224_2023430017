@@ -165,7 +165,7 @@ pair<vector<char>, vector<char>>  cambio_secuencias(vector<int> arreglo_direccio
     int offset_horizontal = 0; // Desplazamiento acumulado para secuencia_HORIZONTAL
     int offset_vertical = 0;   // Desplazamiento acumulado para secuencia_VERTICAL
     
-    for (int i = arreglo_direcciones.size()-1; i > 0; --i) { 
+    for (int i = arreglo_direcciones.size(); i > 0; --i) { 
         if (arreglo_direcciones[i] == 1){ // CASO: arriba
             secuencia_HORIZONTAL.insert(secuencia_HORIZONTAL.begin() + i + offset_horizontal, '-');
             offset_horizontal++;
