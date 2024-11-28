@@ -245,7 +245,12 @@ int main(int argc, char **argv) { //proyecto secuenciaH.txt secuenciaV.txt matri
     }
     archivo_sec2.close();
 
-
+        // Recortar las secuencias si son de diferentes longitudes (demasiado gap)
+    if (secuencia_HORIZONTAL.size() > secuencia_VERTICAL.size()) {
+        secuencia_HORIZONTAL.resize(secuencia_VERTICAL.size());
+    } else if (secuencia_VERTICAL.size() > secuencia_HORIZONTAL.size()) {
+        secuencia_VERTICAL.resize(secuencia_HORIZONTAL.size());
+    }
 
     // Se crea matriz segun longitud de secuencias
     int filas = secuencia_HORIZONTAL.size() +1;
